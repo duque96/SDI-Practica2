@@ -83,7 +83,7 @@ module.exports = function(app, swig, gestorBD) {
 
 			} else {
 				req.session.usuario = usuarios[0].email;
-				res.redirec("/users/list");
+				res.redirect("/users/list");
 			}
 		});
 	});
@@ -96,15 +96,43 @@ module.exports = function(app, swig, gestorBD) {
 
 	// Función para mostrar una lista con todos los usuarios del sistema
 	app.get("/users/list", function(req, res) {
-		gestorBD.obtenerUsuarios({}, function(usuarios) {
+		var criterio = {};
+		if (req.query.searchText != null) {
+			criterio = {
+				$or : [ {
+					"email" : {
+						$regex : ".*" + req.query.searchText + ".*"
+					}
+				}, {
+					"nombre" : {
+						$regex : ".*" + req.query.searchText + ".*"
+					}
+				} ]
+
+			};
+		}
+
+		var pg = parseInt(req.query.pg);
+		if (req.query.pg == null) {
+			pg = 1;
+		}
+
+		gestorBD.obtenerUsuariosPg(criterio, pg, function(usuarios, total) {
 			if (usuarios == null || usuarios.length == 0) {
 				res.redirect("/users/list"
-						+ "?mensaje=Error al obtener los usuarios"
+						+ "?mensaje=No hay usuarios para esa búsqueda"
 						+ "&tipoMensaje=alert-danger");
 			} else {
+				var pgUltima = usuarios.length / 4;
+				if (usuarios.length % 4 > 0) {
+					pgUltima = pgUltima + 1;
+				}
+
 				var respuesta = swig.renderFile('views/buserslist.html', {
 					"user" : req.session.usuario,
-					"usuarios" : usuarios
+					"usuarios" : usuarios,
+					"pgActual" : pg,
+					"pgUltima" : pgUltima
 				});
 				res.send(respuesta);
 			}
