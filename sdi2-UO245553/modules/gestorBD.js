@@ -47,11 +47,11 @@ module.exports = {
 				var collection = db.collection('usuarios');
 				collection.count(function(err, count) {
 					collection.find(criterio).skip((pg - 1) * 6).limit(6)
-							.toArray(function(err, canciones) {
+							.toArray(function(err, usuarios) {
 								if (err) {
 									funcionCallback(null);
 								} else {
-									funcionCallback(canciones, count);
+									funcionCallback(usuarios, count);
 								}
 								db.close();
 							});
@@ -59,4 +59,38 @@ module.exports = {
 			}
 		});
 	},
+	añadirAmigo : function(relacion, functionCallback) {
+		this.mongo.MongoClient.connect(this.app.get('db'), function(err, db) {
+			if (err) {
+				functionCallback(null);
+			} else {
+				var collection = db.collection("relaciones");
+				collection.insert(relacion, function(err, result) {
+					if (err) {
+						functionCallback(null);
+					} else {
+						functionCallback(result.ops[0]._id);
+					}
+					db.close();
+				});
+			}
+		});
+	},
+	obtenerRelaciones : function(criterio, functionCallback) {
+		this.mongo.MongoClient.connect(this.app.get('db'), function(err, db) {
+			if (err) {
+				functionCallback(null);
+			} else {
+				var collection = db.collection("relaciones");
+				collection.find(criterio).toArray(function(err, relaciones) {
+					if (err) {
+						functionCallback(null);
+					} else {
+						functionCallback(relaciones);
+					}
+					db.close()
+				});
+			}
+		});
+	}
 };

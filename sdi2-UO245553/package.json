@@ -21,6 +21,7 @@
     "express": "^4.16.3",
     "express-session": "^1.15.6",
     "mongodb": "^2.2.33",
-    "swig": "^1.4.2"
+    "swig": "^1.4.2",
+    "thymeleaf": "^0.12.0"
   }
 }

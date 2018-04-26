@@ -128,13 +128,83 @@ module.exports = function(app, swig, gestorBD) {
 					pgUltima = pgUltima + 1;
 				}
 
-				var respuesta = swig.renderFile('views/buserslist.html', {
-					"user" : req.session.usuario,
-					"usuarios" : usuarios,
-					"pgActual" : pg,
-					"pgUltima" : pgUltima
+				var criterioUserSession = {
+					"email" : req.session.usuario
+				};
+
+				gestorBD.obtenerUsuarios(criterioUserSession, function(usuario) {
+					if (usuario == null || usuario.length == 0) {
+						res.redirect("/users/list" + "?mensaje=Se ha "
+								+ "producido un " + "error interno"
+								+ "&tipoMensaje=alert-danger");
+					} else {
+						var idSender = usuario[0]._id;
+				
+						var criterioRelaciones = {
+							"idSender" : idSender
+						}
+						
+						gestorBD.obtenerRelaciones(criterioRelaciones,
+								function(relaciones) {
+						
+							for (var i = 0; i < usuarios.length; i++){
+								for (var j = 0; j < relaciones.length; j++){
+									if (relaciones[j].idSender.toString() == idSender.toString() 
+											&& relaciones[j].idRecipient.toString() == usuarios[i]._id.toString()
+											) {
+										usuarios[i]['status']=relaciones[j].status;
+									}
+								}
+								if (usuarios[i].status == null){
+									usuarios[i]['status'] = "empty";
+								}
+							}
+									var respuesta = swig.renderFile(
+											'views/buserslist.html', {
+												"user" : req.session.usuario,
+												"usuarios" : usuarios,
+												"pgActual" : pg,
+												"pgUltima" : pgUltima
+											});
+									res.send(respuesta);
+								});
+					}
 				});
-				res.send(respuesta);
+			}
+		});
+	});
+
+	app.get("/addFriend/:id", function(req, res) {
+		var idRecipient = gestorBD.mongo.ObjectID(req.params.id);
+
+		var criterio = {
+			"email" : req.session.usuario
+		};
+
+		gestorBD.obtenerUsuarios(criterio, function(usuarios) {
+			if (usuarios == null || usuarios.length == 0) {
+				res.redirect("/users/list" + "?mensaje=Se ha producido un "
+						+ "error al agregar un amigo"
+						+ "&tipoMensaje=alert-danger");
+			} else {
+				var idSender = usuarios[0]._id;
+				var relacion = {
+					"idSender" : idSender,
+					"idRecipient" : idRecipient,
+					"status" : "REQUEST"
+				}
+
+				gestorBD.añadirAmigo(relacion, function(id) {
+					if (id == null) {
+						res.redirect("/users/list"
+								+ "?mensaje=Se ha producido un "
+								+ "error al agregar un amigo"
+								+ "&tipoMensaje=alert-danger");
+					} else {
+						res.redirect("/users/list" + "?mensaje=Se ha enviado "
+								+ "la petición de amistad");
+					}
+				});
 			}
 		});
 	});

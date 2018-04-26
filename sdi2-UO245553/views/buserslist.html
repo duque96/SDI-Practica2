@@ -24,10 +24,17 @@ sistema {% endblock %} {% block contenido_principal %}
 				{% for usuario in usuarios %} {% if usuario.email != user %}
 				<tr>
 					<td>{{usuario.nombre}}</td>
-					<td>{{usuario.email}}</td>
+					<td>{{usuario.email}}</td> {% if usuario.status == 'REQUEST' %}
+					<td>
+						<button th:case="'REQUEST'" id="btnRequest" class="btn btn-info"
+							disabled="disabled">Enviada</button>
+					</td> {% endif %} {% if usuario.status == 'FRIEND' %}
+					<td>
+						<button class="btn btn-success" disabled="disabled">Amigos</button>
+					</td> {% endif %} {% if usuario.status == 'empty' %}
 					<td><a id="btnAddFriend"
-						href="/addFriend/{{ cancion._id.toString() }}"
-						class="btn btn-primary">Añadir amigo</a></td>
+						href="/addFriend/{{ usuario._id.toString() }}"
+						class="btn btn-primary">Añadir amigo</a></td> {% endif %}
 				</tr>
 				{% endif %} {% endfor %}
 			</tbody>
@@ -39,13 +46,14 @@ sistema {% endblock %} {% block contenido_principal %}
 <div class="row text-center">
 	<ul class="pagination">
 		<!-- Primera -->
-		<li class="page-item"><a class="page-link" href="/users/list?pg=1">Primera</a>
-		</li>
+		<li class="page-item"><a class="page-link"
+			href="/users/list?pg=1">Primera</a></li>
 
 		<!-- Anterior (si la hay ) -->
 		{% if pgActual-1 >= 1 %}
 		<li class="page-item"><a class="page-link"
-			href="/users/list?pg={{ pgActual -1 }}">{{ pgActual -1 }}</a></li> {% endif %}
+			href="/users/list?pg={{ pgActual -1 }}">{{ pgActual -1 }}</a></li> {%
+		endif %}
 
 		<!-- Actual -->
 		<li class="page-item active"><a class="page-link"
@@ -54,7 +62,8 @@ sistema {% endblock %} {% block contenido_principal %}
 		<!-- Siguiente (si la hay) -->
 		{% if pgActual+1 <= pgUltima %}
 		<li class="page-item"><a class="page-link"
-			href="/users/list?pg={{ pgActual+1 }}">{{ pgActual+1 }}</a></li> {% endif %}
+			href="/users/list?pg={{ pgActual+1 }}">{{ pgActual+1 }}</a></li> {% endif
+		%}
 
 		<!-- Última -->
 		<li class="page-item"><a class="page-link"
