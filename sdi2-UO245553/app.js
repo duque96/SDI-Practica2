@@ -21,7 +21,6 @@ app.use(express.static('public'));
 // routerUsuarioSession
 var routerUsuarioSession = express.Router();
 routerUsuarioSession.use(function(req, res, next) {
-	console.log("routerUsuarioSession");
 	if ( req.session.usuario ) {
 	 // dejamos correr la petición
 		next();
@@ -34,11 +33,11 @@ routerUsuarioSession.use(function(req, res, next) {
 // Aplicar routerUsuarioSession
 app.use("/logout",routerUsuarioSession);
 app.use("/users/list",routerUsuarioSession);
+app.use("/friendRequests",routerUsuarioSession);
 
 // routerNoUsuarioSession
 var routerNoUsuarioSession = express.Router();
 routerNoUsuarioSession.use(function(req, res, next) {
-	console.log("routerNoUsuarioSession");
 	if ( !req.session.usuario ) {
 	 // dejamos correr la petición
 		next();
@@ -62,6 +61,7 @@ app.set('crypto',crypto);
 // Rutas/controladores por lógica
 require("./routes/rhome.js")(app, swig);
 require("./routes/rusuarios.js")(app, swig, gestorBD);
+require("./routes/rResetBD.js")(app, gestorBD);
 
 // lanzar el servidor
 app.use(function(err, req, res, next) {

@@ -5,6 +5,40 @@ module.exports = {
 		this.mongo = mongo;
 		this.app = app;
 	},
+	removeUsers : function(criterio, funcionCallback) {
+		this.mongo.MongoClient.connect(this.app.get('db'), function(err, db) {
+			if (err) {
+				funcionCallback(null);
+			} else {
+				var collection = db.collection('usuarios');
+				collection.remove(criterio, function(err, obj) {
+					if (err) {
+						funcionCallback(null);
+					} else {
+						funcionCallback(obj.result.n);
+					}
+					db.close();
+				});
+			}
+		});
+	},
+	removeRelationships : function(criterio, funcionCallback) {
+		this.mongo.MongoClient.connect(this.app.get('db'), function(err, db) {
+			if (err) {
+				funcionCallback(null);
+			} else {
+				var collection = db.collection('relaciones');
+				collection.remove(criterio, function(err, obj) {
+					if (err) {
+						funcionCallback(null);
+					} else {
+						funcionCallback(obj.result.n);
+					}
+					db.close();
+				});
+			}
+		});
+	},
 	insertarUsuario : function(usuario, funcionCallback) {
 		this.mongo.MongoClient.connect(this.app.get('db'), function(err, db) {
 			if (err) {
@@ -88,9 +122,29 @@ module.exports = {
 					} else {
 						functionCallback(relaciones);
 					}
-					db.close()
+					db.close();
 				});
 			}
 		});
-	}
+	},
+	obtenerRelacionesPg : function(criterio, pg, funcionCallback) {
+		this.mongo.MongoClient.connect(this.app.get('db'), function(err, db) {
+			if (err) {
+				funcionCallback(null);
+			} else {
+				var collection = db.collection('relaciones');
+				collection.count(function(err, count) {
+					collection.find(criterio).skip((pg - 1) * 6).limit(6)
+							.toArray(function(err, relaciones) {
+								if (err) {
+									funcionCallback(null);
+								} else {
+									funcionCallback(relaciones, count);
+								}
+								db.close();
+							});
+				});
+			}
+		});
+	},
 };
