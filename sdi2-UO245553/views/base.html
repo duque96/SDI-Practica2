@@ -45,6 +45,8 @@
 				{% endif %}
 				<ul class="nav navbar-nav navbar-right">
 					{% if user != null %}
+					<li><a id="listarAmigos" href="/friendsList"
+						class="listarAmigos">Amigos</a></li>{% endif %} {% if user != null %}
 					<li><a id="solicitudesAmistad" href="/friendRequests"
 						class="solicitudesAmistad">Solicitudes de amistad </a></li>{% endif %}
 					{% if user == null %}

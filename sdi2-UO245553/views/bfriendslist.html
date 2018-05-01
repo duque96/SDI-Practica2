@@ -1,0 +1,64 @@
+{% extends "base.html" %} {% block titulo %} Índice {% endblock %} {%
+block contenido_principal %}
+<div class="container">
+	<h2>Lista de amigos</h2>
+	<p>A continuación se muestra una lista de los usuarios amigos.</p>
+	<div class="table-responsive">
+		{% if friendsList.length > 0 %}
+		<table class="table table-hover">
+			<thead>
+				<tr>
+					<th>Nombre</th>
+					<th>Email</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for f in friendsList%}
+				<tr>
+					<td>{{f.recipient.nombre}}</td>
+					<td>{{f.recipient.email}}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		{% endif %}
+	</div>
+
+	<div style="text-align: center">
+		{% if friendsList.length == 0 %}
+		<h3>No tienes amigos agregados.</h3>
+		{% endif %}
+	</div>
+</div>
+
+<!-- Paginación mostrar la actual y 2 anteriores y dos siguientes -->
+<div class="row text-center">
+	{% if friendsList.length != 0 %}
+	<ul class="pagination">
+		<!-- Primera -->
+		<li class="page-item"><a class="page-link"
+			href="/friendsList?pg=1">Primera</a></li>
+
+		<!-- Anterior (si la hay ) -->
+		{% if pgActual-1 >= 1 %}
+		<li class="page-item"><a class="page-link"
+			href="/friendsList?pg={{ pgActual -1 }}">{{ pgActual -1 }}</a></li> {%
+		endif %}
+
+		<!-- Actual -->
+		<li class="page-item active"><a class="page-link"
+			href="/friendsList?pg={{ pgActual }}">{{ pgActual }}</a></li>
+
+		<!-- Siguiente (si la hay) -->
+		{% if pgActual+1 <= pgUltima %}
+		<li class="page-item"><a class="page-link"
+			href="/friendsList?pg={{ pgActual+1 }}">{{ pgActual+1 }}</a></li> {% endif
+		%}
+
+		<!-- Última -->
+		<li class="page-item"><a class="page-link"
+			href="/friendsList?pg={{ pgUltima }}">Última</a></li>
+	</ul>
+	{% endif %}
+</div>
+{% endblock %}

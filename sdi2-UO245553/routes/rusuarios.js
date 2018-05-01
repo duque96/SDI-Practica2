@@ -315,30 +315,109 @@ module.exports = function(app, swig, gestorBD) {
 						+ "interno al añadir al amigo"
 						+ "&tipoMensaje=alert-danger");
 			} else {
-				console.log("llego");
+				
 				for(var i = 0; i <relaciones.length; i++){
 					relaciones[i].status = "FRIEND";
-					
-					var criterio = {
-							"sender" : relaciones[i].sender,
-							"recipient" : relaciones[i].recipient,
-							"status" : relaciones[i].status
-					}
-					gestorBD.actualizarRelaciones(criterio, relaciones[i], function(obj){
-						if (obj == null){
-							console.log("Error al actualizar las relaciones");
-							res.redirect("/friendRequests?mensaje=Se ha "
-									+ "producido un error " 
-									+ "interno al añadir al amigo"
-									+ "&tipoMensaje=alert-danger");
-						} else {
-							if (i == (relaciones.length - 1)) {
-								res.redirect("/friendRequests?mensaje=Se ha "
-										+ "aceptado la petición de amistad");
-							}
-						}
-					})
 				}
+			
+				var criterio = {
+						"sender" : relaciones[0].sender,
+						"recipient" : relaciones[0].recipient,
+						"status" : "REQUEST"
+				}
+				
+				gestorBD.actualizarRelaciones(criterio, relaciones[0], function(obj){
+					if (obj == null){
+						console.log("Error al actualizar las relaciones");
+						res.redirect("/friendRequests?mensaje=Se ha "
+								+ "producido un error " 
+								+ "interno al añadir al amigo"
+								+ "&tipoMensaje=alert-danger");
+					} else {						
+						if (relaciones.length > 1) {
+							criterio = {
+									"sender" : relaciones[1].sender,
+									"recipient" : relaciones[1].recipient,
+									"status" : "REQUEST"
+							}
+							
+							gestorBD.actualizarRelaciones(criterio, relaciones[1], function(obj){
+								if (obj == null){
+									console.log("Error al actualizar las relaciones");
+									res.redirect("/friendRequests?mensaje=Se ha "
+											+ "producido un error " 
+											+ "interno al añadir al amigo"
+											+ "&tipoMensaje=alert-danger");
+								} else {
+									console.log("Se ha aceptado la petición de amistad "
+											+ "entre " + relaciones[1].sender + " y "
+											+ relaciones[1].recipient);
+									res.redirect("/friendRequests?mensaje=Se ha "
+											+ "aceptado la petición de amistad");
+								}
+							});
+						} else {
+							var relacionAux = {
+									"sender" : relaciones[0].recipient,
+									"recipient" : relaciones[0].sender,
+									"status" : "FRIEND"
+							}
+							gestorBD.añadirAmigo(relacionAux, function(id){
+								if (id == null){
+									console.log("Error al actualizar las relaciones");
+									res.redirect("/friendRequests?mensaje=Se ha "
+											+ "producido un error " 
+											+ "interno al añadir al amigo"
+											+ "&tipoMensaje=alert-danger");
+								} else {
+									console.log("Se ha aceptado la petición de amistad "
+											+ "entre " + relaciones[0].sender + " y "
+											+ relaciones[0].recipient);
+									res.redirect("/friendRequests?mensaje=Se ha "
+											+ "aceptado la petición de amistad");
+								}
+							});
+						}
+					}
+				});
+			}
+		});
+	});
+	
+	app.get("/friendsList", function(req, res){
+		var pg = parseInt(req.query.pg);
+		if (req.query.pg == null) {
+			pg = 1;
+		}
+		
+		var criterio = {
+				"sender.email" : req.session.usuario,
+				"status" : "FRIEND"
+		};
+		
+		gestorBD.obtenerRelacionesPg(criterio, pg, function(relaciones, total){
+			if (relaciones == null){
+				console.log("Error al cargar la lista de amigos para "
+						+ req.session.usuario);
+				res.redirect("/users/list?mensaje=Se ha "
+						+ "producido un error " 
+						+ "interno al cargar la lista de amigos"
+						+ "&tipoMensaje=alert-danger");
+			} else {
+				var pgUltima = total / 4;
+				if (total % 4 > 0) {
+					pgUltima = pgUltima + 1;
+				}
+				console.log("Se ha cargado la lista de amigos para "
+						+ req.session.usuario);
+				var respuesta = swig.renderFile('views/bfriendslist.html', {
+					"user" : req.session.usuario,
+					"friendsList" : relaciones,
+					"pgActual" : pg,
+					"pgUltima" : pgUltima
+				});
+				
+				res.send(respuesta);
 			}
 		});
 	});

@@ -34,6 +34,7 @@ routerUsuarioSession.use(function(req, res, next) {
 app.use("/logout",routerUsuarioSession);
 app.use("/users/list",routerUsuarioSession);
 app.use("/friendRequests",routerUsuarioSession);
+app.use("/friendsList",routerUsuarioSession);
 
 // routerNoUsuarioSession
 var routerNoUsuarioSession = express.Router();
