@@ -18,7 +18,7 @@ endblock %} {% block contenido_principal %}
 				<tr>
 					<td>{{r.sender.nombre}}</td>
 					<td><a id="btnAccept"
-						href="/friendRequests/accept/{{ r._id.toString() }}"
+						href="/friendRequests/accept/{{ r.sender._id.toString() }}"
 						class="btn btn-primary" style="">Aceptar</a></td>
 				</tr>
 				{% endfor %}

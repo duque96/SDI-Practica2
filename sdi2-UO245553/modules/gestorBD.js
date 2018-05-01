@@ -147,4 +147,21 @@ module.exports = {
 			}
 		});
 	},
+	actualizarRelaciones : function(criterio, relacion, functionCallback) {
+		this.mongo.MongoClient.connect(this.app.get('db'), function(err, db) {
+			if (err) {
+				functionCallback(null);
+			} else {
+				var collection = db.collection("relaciones");
+				collection.update(criterio, relacion, function(err, obj) {
+					if (err) {
+						functionCallback(null);
+					} else {
+						functionCallback(obj);
+					}
+					db.close();
+				});
+			}
+		});
+	},
 };

@@ -39,9 +39,9 @@ module.exports = function(app, swig, gestorBD) {
 		};
 
 		gestorBD.obtenerUsuarios(criterio, function(usuarios) {
-			if (usuarios === null || usuarios.length === 0) {
+			if (usuarios == null || usuarios.length == 0) {
 				gestorBD.insertarUsuario(usuario, function(id) {
-					if (id === null) {
+					if (id == null) {
 						console.log("Error al registrar al usuario en /signup");
 						res.redirect("/signup?mensaje=Error "
 								+ "al registrar usuario");
@@ -80,7 +80,7 @@ module.exports = function(app, swig, gestorBD) {
 		};
 
 		gestorBD.obtenerUsuarios(criterio, function(usuarios) {
-			if (usuarios === null || usuarios.length === 0) {
+			if (usuarios == null || usuarios.length == 0) {
 				console.log("Error de inicio de sesión en /login");
 				req.session.usuario = null;
 				res.redirect("/login" + "?mensaje=Email o password incorrecto"
@@ -104,7 +104,7 @@ module.exports = function(app, swig, gestorBD) {
 	// Función para mostrar una lista con todos los usuarios del sistema
 	app.get("/users/list", function(req, res) {
 		var criterio = {};
-		if (req.query.searchText !== null) {
+		if (req.query.searchText != null) {
 			criterio = {
 				$or : [ {
 					"email" : {
@@ -120,12 +120,12 @@ module.exports = function(app, swig, gestorBD) {
 		}
 
 		var pg = parseInt(req.query.pg);
-		if (req.query.pg === null) {
+		if (req.query.pg == null) {
 			pg = 1;
 		}
 
 		gestorBD.obtenerUsuariosPg(criterio, pg, function(usuarios, total) {
-			if (usuarios === null || usuarios.length === 0) {
+			if (usuarios == null || usuarios.length == 0) {
 				console.log("No hay usuarios en la bd /users/list");
 				res.redirect("/users/list"
 						+ "?mensaje=No hay usuarios para esa búsqueda"
@@ -141,7 +141,7 @@ module.exports = function(app, swig, gestorBD) {
 				};
 
 				gestorBD.obtenerUsuarios(criterioUserSession, function(usuario) {
-					if (usuario === null || usuario.length === 0) {
+					if (usuario == null || usuario.length == 0) {
 						console.log("Error al obtener el usuario en sesión " 
 								+ req.session.usuario +" /users/list");
 						res.redirect("/users/list?mensaje=Se ha "
@@ -156,7 +156,7 @@ module.exports = function(app, swig, gestorBD) {
 						
 						gestorBD.obtenerRelaciones(criterioRelaciones,
 								function(relaciones) {
-							if (relaciones === null) {
+							if (relaciones == null) {
 								console.log("Error al obtener las relaciones " +
 										"para el usuario en sesión " 
 										+ req.session.usuario +" /users/list");
@@ -166,12 +166,12 @@ module.exports = function(app, swig, gestorBD) {
 							} else {
 								for (var i = 0; i < usuarios.length; i++){
 									for (var j = 0; j < relaciones.length; j++){
-										if (relaciones[j].sender._id.toString() === sender._id.toString() 
-												&& relaciones[j].recipient._id.toString() === usuarios[i]._id.toString()) {
+										if (relaciones[j].sender._id.toString() == sender._id.toString() 
+												&& relaciones[j].recipient._id.toString() == usuarios[i]._id.toString()) {
 											usuarios[i]['status'] = relaciones[j].status;
 										}
 									}
-									if (usuarios[i].status === null){
+									if (usuarios[i].status == null){
 										usuarios[i]['status'] = "empty";
 									}
 								}
@@ -204,7 +204,7 @@ module.exports = function(app, swig, gestorBD) {
 		};
 
 		gestorBD.obtenerUsuarios(criterioSender, function(sender) {
-			if (sender === null || sender.length === 0) {
+			if (sender == null || sender.length == 0) {
 				console.log("Error al obtener al usuario sender" +
 				" en /addFriend");
 				res.redirect("/users/list" + "?mensaje=Se ha producido un "
@@ -217,7 +217,7 @@ module.exports = function(app, swig, gestorBD) {
 				};
 				
 				gestorBD.obtenerUsuarios(criterioRecipient, function(recipient) {
-					if (recipient === null || recipient.length === 0) {
+					if (recipient == null || recipient.length == 0) {
 						console.log("Error al obtener al usuario recipient" +
 								" en /addFriend");
 						res.redirect("/users/list" + "?mensaje=Se ha producido un "
@@ -232,7 +232,7 @@ module.exports = function(app, swig, gestorBD) {
 						};
 						
 						gestorBD.añadirAmigo(relacion, function(id) {
-							if (id === null) {
+							if (id == null) {
 								console.log("Error al añadir amigo en /addFriend");
 								res.redirect("/users/list"
 										+ "?mensaje=Se ha producido un "
@@ -256,7 +256,7 @@ module.exports = function(app, swig, gestorBD) {
 		var emailSession = req.session.usuario;
 		
 		var pg = parseInt(req.query.pg);
-		if (req.query.pg === null) {
+		if (req.query.pg == null) {
 			pg = 1;
 		}
 		
@@ -266,7 +266,7 @@ module.exports = function(app, swig, gestorBD) {
 		};
 		
 		gestorBD.obtenerRelacionesPg(criterioSession, pg,  function(relaciones, total) {
-			if (relaciones === null) {
+			if (relaciones == null) {
 				console.log("Error al obtener las relaciones en /friendRequests");
 				res.redirect("/friendRequests?mensaje=Se ha "
 						+ "producido un error interno"
@@ -287,6 +287,58 @@ module.exports = function(app, swig, gestorBD) {
 				});
 				
 				res.send(respuesta);
+			}
+		});
+	});
+	
+	app.get("/friendRequests/accept/:id", function(req, res){
+		var idUser = req.params.id;
+		
+		var criterioRelaciones = {
+			$or : [ {
+				"recipient._id" : gestorBD.mongo.ObjectID(idUser),
+				"sender.email" : req.session.usuario,
+				"status" : "REQUEST"
+			}, {
+				"recipient.email" : req.session.usuario,
+				"sender._id" : gestorBD.mongo.ObjectID(idUser),
+				"status" : "REQUEST"
+			} ]
+		}
+		
+		gestorBD.obtenerRelaciones(criterioRelaciones, function(relaciones){
+			if (relaciones == null || relaciones.length == 0){
+				console.log("Error al aceptar la petición "
+						+ req.session.usuario + " " + idUser);
+				res.redirect("/friendRequests?mensaje=Se ha "
+						+ "producido un error " 
+						+ "interno al añadir al amigo"
+						+ "&tipoMensaje=alert-danger");
+			} else {
+				console.log("llego");
+				for(var i = 0; i <relaciones.length; i++){
+					relaciones[i].status = "FRIEND";
+					
+					var criterio = {
+							"sender" : relaciones[i].sender,
+							"recipient" : relaciones[i].recipient,
+							"status" : relaciones[i].status
+					}
+					gestorBD.actualizarRelaciones(criterio, relaciones[i], function(obj){
+						if (obj == null){
+							console.log("Error al actualizar las relaciones");
+							res.redirect("/friendRequests?mensaje=Se ha "
+									+ "producido un error " 
+									+ "interno al añadir al amigo"
+									+ "&tipoMensaje=alert-danger");
+						} else {
+							if (i == (relaciones.length - 1)) {
+								res.redirect("/friendRequests?mensaje=Se ha "
+										+ "aceptado la petición de amistad");
+							}
+						}
+					})
+				}
 			}
 		});
 	});
