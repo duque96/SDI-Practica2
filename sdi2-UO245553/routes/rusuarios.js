@@ -20,44 +20,44 @@ module.exports = function(app, swig, gestorBD) {
 			res.redirect("/signup?" + "mensaje=Las contraseñas no coinciden");
 		}
 
-		if (!validator.validate(email)) {
+		else if (!validator.validate(email)) {
 			res.redirect("/signup?mensaje=El "
 					+ "formato del email es incorrecto");
+		} else {
+			var seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
+					.update(password).digest('hex');
+	
+			var usuario = {
+				nombre : nombre,
+				email : email,
+				password : seguro
+			};
+	
+			var criterio = {
+				"email" : email
+			};
+	
+			gestorBD.obtenerUsuarios(criterio, function(usuarios) {
+				if (usuarios == null || usuarios.length == 0) {
+					gestorBD.insertarUsuario(usuario, function(id) {
+						if (id == null) {
+							console.log("Error al registrar al usuario en /signup");
+							res.redirect("/signup?mensaje=Error "
+									+ "al registrar usuario");
+						} else {
+							console.log("Registrado correctamente al usuario " +
+									email);
+							res.redirect("/login?mensaje=Nuevo "
+									+ "usuario registrado");
+						}
+					});
+				} else {
+					console.log("Email repetido " + email + " en /signup");
+					res.redirect("/signup?mensaje=Ya existe "
+							+ "un usuario con ese email");
+				}
+			});
 		}
-
-		var seguro = app.get("crypto").createHmac('sha256', app.get('clave'))
-				.update(password).digest('hex');
-
-		var usuario = {
-			nombre : nombre,
-			email : email,
-			password : seguro
-		};
-
-		var criterio = {
-			"email" : email
-		};
-
-		gestorBD.obtenerUsuarios(criterio, function(usuarios) {
-			if (usuarios == null || usuarios.length == 0) {
-				gestorBD.insertarUsuario(usuario, function(id) {
-					if (id == null) {
-						console.log("Error al registrar al usuario en /signup");
-						res.redirect("/signup?mensaje=Error "
-								+ "al registrar usuario");
-					} else {
-						console.log("Registrado correctamente al usuario " +
-								email);
-						res.redirect("/login?mensaje=Nuevo "
-								+ "usuario registrado");
-					}
-				});
-			} else {
-				console.log("Email repetido " + email + " en /signup");
-				res.redirect("/signup?mensaje=Ya existe "
-						+ "un usuario con ese email");
-			}
-		});
 	});
 
 	// Función get para mostrar la vista de inicio de sesión
@@ -83,7 +83,7 @@ module.exports = function(app, swig, gestorBD) {
 			if (usuarios == null || usuarios.length == 0) {
 				console.log("Error de inicio de sesión en /login");
 				req.session.usuario = null;
-				res.redirect("/login" + "?mensaje=Email o password incorrecto"
+				res.redirect("/login" + "?mensaje=Email o contraseña incorrecta"
 						+ "&tipoMensaje=alert-danger ");
 
 			} else {

@@ -30,7 +30,7 @@ sistema {% endblock %} {% block contenido_principal %}
 							disabled="disabled">Enviada</button>
 					</td> {% endif %} {% if usuario.status == 'FRIEND' %}
 					<td>
-						<button class="btn btn-success" disabled="disabled">Amigos</button>
+						<button class="btn btn-success" disabled="disabled">Amigo</button>
 					</td> {% endif %} {% if usuario.status == 'empty' %}
 					<td><a id="btnAddFriend"
 						href="/addFriend/{{ usuario._id.toString() }}"

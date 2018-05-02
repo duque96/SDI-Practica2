@@ -68,7 +68,7 @@ module.exports = function(app, gestorBD) {
 				},
 				{
 					nombre : "Carlos",
-					email : "elena@gmail.com",
+					email : "carlos@gmail.com",
 					password : app.get("crypto").createHmac('sha256',
 							app.get('clave')).update("123456").digest('hex')
 				}, ];
