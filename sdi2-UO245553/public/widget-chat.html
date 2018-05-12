@@ -1,0 +1,100 @@
+<div class="container" style="margin-bottom: 20px" id="chats"></div>
+
+<div class="container chat">
+	<div class="input-group">
+		<input type="text" id="textoMensaje" name="textoMensaje"
+			class="form-control" placeholder="Escribir mensaje"> <span
+			class="input-group-btn">
+			<button onclick="crearMensaje()" class="btn btn-primary"
+				type="button" id="crearMensaje">
+				<span class="glyphicon glyphicon-share-alt"></span>
+			</button>
+		</span>
+	</div>
+</div>
+
+<script>
+	var mensajes;
+	var contador = 0;
+	var numMensajes = 0;
+	function cargarMensajes() {
+		$.ajax({
+			url : URLbase + "/mensajes/" + idUser,
+			type : "GET",
+			data : {},
+			dataType : 'json',
+			headers : {
+				"token" : token
+			},
+			success : function(respuesta) {
+				console.log(respuesta);
+				mensajes = respuesta;
+				if (numMensajes != mensajes.length) {
+					numMensajes++;
+					actualizarMensajes(mensajes);
+				}
+			},
+			error : function(error) {
+				$("#contenedor-principal").load("widget-login.html");
+			}
+		});
+	}
+
+	function actualizarMensajes(mensajesMostrar) {
+		$("#chats").empty(); // Vaciar la tabla
+		for (i = 0; i < mensajesMostrar.length; i++) {
+			if (mensajesMostrar[i].emisor._id == idUser) {
+				$("#chats").append(
+						"<div class='container darker'><label>"
+								+ mensajesMostrar[i].emisor.nombre
+								+ "</label><p>" + mensajesMostrar[i].texto
+								+ "</p></div>");
+			} else {
+				$("#chats").append(
+						"<div class='container light' id=" + mensajesMostrar[i]._id + "><label>"
+								+ mensajesMostrar[i].emisor.nombre
+								+ "</label><p>" + mensajesMostrar[i].texto
+								+ "</p></div>");
+				if (mensajesMostrar[i].leido) {
+					console.log("Estoy leido");
+					$("#" + mensajesMostrar[i]._id).append(
+							"<span class='time-right'>Leido</span>");
+				}
+			}
+		}
+
+		if (contador == 0) {
+			// Quiero que se haga scroll para ver el último mensaje
+			window.scroll(0, document.documentElement.scrollHeight);
+			contador++;
+		}
+	}
+
+	cargarMensajes();
+
+	function crearMensaje() {
+		$.ajax({
+			url : URLbase + "/mensaje",
+			type : "POST",
+			data : {
+				id : idUser,
+				texto : $("#textoMensaje").val()
+			},
+			dataType : 'json',
+			headers : {
+				"token" : token
+			},
+			success : function(respuesta) {
+				$("#textoMensaje").val("");
+				contador = 0;
+			},
+			error : function(error) {
+				$("#contenedor-principal").load("widget-login.html");
+			}
+		});
+	}
+
+	loopChat = setInterval(function() {
+		cargarMensajes();
+	}, 5000);
+</script>

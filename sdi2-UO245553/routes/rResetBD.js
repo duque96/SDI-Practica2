@@ -83,4 +83,10 @@ module.exports = function(app, gestorBD) {
 			}
 		});
 	});
+	
+	app.get("/insertRest", function(req, res){
+		
+	});
+		
+	
 };

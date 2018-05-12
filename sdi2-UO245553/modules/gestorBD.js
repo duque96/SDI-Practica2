@@ -164,4 +164,59 @@ module.exports = {
 			}
 		});
 	},
+	crearMensaje : function(mensaje, funcionCallback) {
+		this.mongo.MongoClient.connect(this.app.get('db'), function(err, db) {
+			if (err) {
+				funcionCallback(null);
+			} else {
+				var collection = db.collection('mensajes');
+				collection.insert(mensaje, function(err, result) {
+					if (err) {
+						funcionCallback(null);
+					} else {
+						funcionCallback(result.ops[0]._id);
+					}
+					db.close();
+				});
+			}
+		});
+	},
+	obtenerMensajes : function(criterio, functionCallback) {
+		this.mongo.MongoClient.connect(this.app.get('db'), function(err, db) {
+			if (err) {
+				functionCallback(null);
+			} else {
+				var collection = db.collection('mensajes');
+				collection.find(criterio).toArray(function(err, mensajes) {
+					if (err) {
+						functionCallback(null);
+					} else {
+						functionCallback(mensajes);
+					}
+					db.close();
+				});
+			}
+		});
+	},
+	actualizarMensaje : function(criterio, atributos, functionCallback) {
+		this.mongo.MongoClient.connect(this.app.get('db'), function(err, db) {
+			if (err) {
+				functionCallback(null);
+			} else {
+				var collection = db.collection("mensajes");
+				collection.update(criterio, {
+					$set : atributos
+				}, {
+					multi : true
+				}, function(err, obj) {
+					if (err) {
+						functionCallback(null);
+					} else {
+						functionCallback(obj);
+					}
+					db.close();
+				});
+			}
+		});
+	}
 };

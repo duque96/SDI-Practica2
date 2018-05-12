@@ -2,23 +2,82 @@
 
 /* Sticky footer styles-------------------------------------------------- */
 html {
-  position: relative;
-  min-height: 100%;
+	position: relative;
+	min-height: 100%;
 }
 
 body {
-  /* Margin bottom by footer height */
-  margin-bottom: 60px;
+	/* Margin bottom by footer height */
+	margin-bottom: 60px;
 }
 
 footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 60px;
-  background-color: #101010;
-  text-align:center;
-  line-height:60px
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	height: 60px;
+	background-color: #101010;
+	text-align: center;
+	line-height: 60px
 }
 
 /* Sticky footer styles-------------------------------------------------- */
+/* Chat containers */
+.light {
+	border: 2px solid #dedede;
+	background-color: #e6f5ff;
+	border-radius: 5px;
+	padding: 10px;
+	margin: 10px 0px 0px -30px;
+}
+
+.chat {
+	bottom: 0;
+	position: absolute;
+	margin-bottom: 30px;
+	position: absolute;
+}
+
+/* Darker chat container */
+.darker {
+	border: 2px solid #dedede;
+	border-radius: 5px;
+	padding: 10px;
+	margin: 10px 0px 0px 30px;
+	border-color: #ccc;
+	background-color: #66c2ff;
+}
+
+/* Clear floats */
+.container::after {
+	content: "";
+	clear: both;
+	display: table;
+}
+
+/* Style images */
+.container img {
+	float: left;
+	width: 100%;
+	margin-right: 20px;
+	border-radius: 50%;
+}
+
+/* Style the right image */
+.container img.right {
+	float: right;
+	margin-left: 20px;
+	margin-right: 0;
+}
+
+/* Style time text */
+.time-right {
+	float: right;
+	color: #aaa;
+}
+
+/* Style time text */
+.time-left {
+	float: left;
+	color: #999;
+}

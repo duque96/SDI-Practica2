@@ -19,6 +19,7 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 
 import com.uniovi.tests.pageobjects.PO_FriendRequestView;
 import com.uniovi.tests.pageobjects.PO_HomeView;
+import com.uniovi.tests.pageobjects.PO_JQueryView;
 import com.uniovi.tests.pageobjects.PO_LoginView;
 import com.uniovi.tests.pageobjects.PO_RegisterView;
 import com.uniovi.tests.pageobjects.PO_UserListView;
@@ -346,5 +347,279 @@ public class Sdi2UO245553Tests {
 		assertTrue(elementos.size() == 1);
 
 		PO_View.checkElement(driver, "text", "Pepe");
+	}
+
+	@Test
+	public void CInVal() {
+		driver.navigate().to(URL + "/cliente.html");
+
+		PO_JQueryView.login(driver, "daniel@gmail.com", "123456");
+		PO_View.checkElement(driver, "text", "Actualizar"); // Estamos en la vista de la lista de amigos
+	}
+
+	@Test
+	public void CInInVal() {
+		driver.navigate().to(URL + "/cliente.html");
+
+		PO_JQueryView.login(driver, "ana@gmail.com", "123456");
+		PO_View.checkElement(driver, "text", "Usuario no encontrado");
+	}
+
+	@Test
+	public void CListAmiVal() {
+		// Primero hay que agregar a 3 amigos
+		PO_HomeView.clickOption(driver, "login", "class", "login");
+
+		PO_LoginView.fillForm(driver, "daniel@gmail.com", "123456");
+
+		PO_UserListView.fillForm(driver, "Pepe");
+		PO_UserListView.sendPetition(driver);
+		PO_View.checkElement(driver, "text", "Enviada");
+
+		PO_UserListView.fillForm(driver, "Raul");
+		PO_UserListView.sendPetition(driver);
+		PO_View.checkElement(driver, "text", "Enviada");
+
+		PO_UserListView.fillForm(driver, "Maria");
+		PO_UserListView.sendPetition(driver);
+		PO_View.checkElement(driver, "text", "Enviada");
+
+		PO_HomeView.clickOption(driver, "logout");
+
+		PO_LoginView.fillForm(driver, "pepe@gmail.com", "123456");
+		PO_HomeView.clickOption(driver, "friendRequests", "class", "solicitudesAmistad");
+		PO_FriendRequestView.clickBotonAceptar(driver);
+		PO_View.checkElement(driver, "text", "No tienes ninguna petición de amistad pendiente");
+
+		PO_HomeView.clickOption(driver, "logout");
+
+		PO_LoginView.fillForm(driver, "raul@gmail.com", "123456");
+		PO_HomeView.clickOption(driver, "friendRequests", "class", "solicitudesAmistad");
+		PO_FriendRequestView.clickBotonAceptar(driver);
+		PO_View.checkElement(driver, "text", "No tienes ninguna petición de amistad pendiente");
+
+		PO_HomeView.clickOption(driver, "logout");
+
+		PO_LoginView.fillForm(driver, "maria@gmail.com", "123456");
+		PO_HomeView.clickOption(driver, "friendRequests", "class", "solicitudesAmistad");
+		PO_FriendRequestView.clickBotonAceptar(driver);
+		PO_View.checkElement(driver, "text", "No tienes ninguna petición de amistad pendiente");
+
+		// Ahora ya hay 3 usuarios amigos
+		driver.navigate().to(URL + "/cliente.html");
+		PO_JQueryView.login(driver, "daniel@gmail.com", "123456");
+
+		// comprobamos que hay 3 usuarios en la lista
+		List<WebElement> elementos = SeleniumUtils.EsperaCargaPagina(driver, "free", "//tbody/tr",
+				PO_View.getTimeout());
+		assertTrue(elementos.size() == 3);
+	}
+
+	@Test
+	public void CListAmiFil() {
+		// Agregamos 3 amigos
+		PO_HomeView.clickOption(driver, "login", "class", "login");
+
+		PO_LoginView.fillForm(driver, "daniel@gmail.com", "123456");
+
+		PO_UserListView.fillForm(driver, "Pepe");
+		PO_UserListView.sendPetition(driver);
+		PO_View.checkElement(driver, "text", "Enviada");
+
+		PO_UserListView.fillForm(driver, "Raul");
+		PO_UserListView.sendPetition(driver);
+		PO_View.checkElement(driver, "text", "Enviada");
+
+		PO_UserListView.fillForm(driver, "Maria");
+		PO_UserListView.sendPetition(driver);
+		PO_View.checkElement(driver, "text", "Enviada");
+
+		PO_HomeView.clickOption(driver, "logout");
+
+		PO_LoginView.fillForm(driver, "pepe@gmail.com", "123456");
+		PO_HomeView.clickOption(driver, "friendRequests", "class", "solicitudesAmistad");
+		PO_FriendRequestView.clickBotonAceptar(driver);
+		PO_View.checkElement(driver, "text", "No tienes ninguna petición de amistad pendiente");
+
+		PO_HomeView.clickOption(driver, "logout");
+
+		PO_LoginView.fillForm(driver, "raul@gmail.com", "123456");
+		PO_HomeView.clickOption(driver, "friendRequests", "class", "solicitudesAmistad");
+		PO_FriendRequestView.clickBotonAceptar(driver);
+		PO_View.checkElement(driver, "text", "No tienes ninguna petición de amistad pendiente");
+
+		PO_HomeView.clickOption(driver, "logout");
+
+		PO_LoginView.fillForm(driver, "maria@gmail.com", "123456");
+		PO_HomeView.clickOption(driver, "friendRequests", "class", "solicitudesAmistad");
+		PO_FriendRequestView.clickBotonAceptar(driver);
+		PO_View.checkElement(driver, "text", "No tienes ninguna petición de amistad pendiente");
+
+		// Ahora buscamos en el cuadro de búsqueda
+		driver.navigate().to(URL + "/cliente.html");
+		PO_JQueryView.login(driver, "daniel@gmail.com", "123456");
+
+		// comprobamos que hay 3 usuarios en la lista
+		List<WebElement> elementos = SeleniumUtils.EsperaCargaPagina(driver, "free", "//tbody/tr",
+				PO_View.getTimeout());
+		assertTrue(elementos.size() == 3);
+
+		PO_JQueryView.searchForm(driver, "pepe@gmail");
+
+		SeleniumUtils.EsperaCargaPaginaNoTexto(driver, "Raul", PO_View.getTimeout());
+
+		elementos = SeleniumUtils.EsperaCargaPagina(driver, "free", "//tbody/tr", PO_View.getTimeout());
+		assertTrue(elementos.size() == 1);
+	}
+
+	@Test
+	public void CCrearMenVal() {
+		// Agregamos 3 amigos
+		PO_HomeView.clickOption(driver, "login", "class", "login");
+
+		PO_LoginView.fillForm(driver, "daniel@gmail.com", "123456");
+
+		PO_UserListView.fillForm(driver, "Pepe");
+		PO_UserListView.sendPetition(driver);
+		PO_View.checkElement(driver, "text", "Enviada");
+
+		PO_UserListView.fillForm(driver, "Raul");
+		PO_UserListView.sendPetition(driver);
+		PO_View.checkElement(driver, "text", "Enviada");
+
+		PO_UserListView.fillForm(driver, "Maria");
+		PO_UserListView.sendPetition(driver);
+		PO_View.checkElement(driver, "text", "Enviada");
+
+		PO_HomeView.clickOption(driver, "logout");
+
+		PO_LoginView.fillForm(driver, "pepe@gmail.com", "123456");
+		PO_HomeView.clickOption(driver, "friendRequests", "class", "solicitudesAmistad");
+		PO_FriendRequestView.clickBotonAceptar(driver);
+		PO_View.checkElement(driver, "text", "No tienes ninguna petición de amistad pendiente");
+
+		PO_HomeView.clickOption(driver, "logout");
+
+		PO_LoginView.fillForm(driver, "raul@gmail.com", "123456");
+		PO_HomeView.clickOption(driver, "friendRequests", "class", "solicitudesAmistad");
+		PO_FriendRequestView.clickBotonAceptar(driver);
+		PO_View.checkElement(driver, "text", "No tienes ninguna petición de amistad pendiente");
+
+		PO_HomeView.clickOption(driver, "logout");
+
+		PO_LoginView.fillForm(driver, "maria@gmail.com", "123456");
+		PO_HomeView.clickOption(driver, "friendRequests", "class", "solicitudesAmistad");
+		PO_FriendRequestView.clickBotonAceptar(driver);
+		PO_View.checkElement(driver, "text", "No tienes ninguna petición de amistad pendiente");
+
+		driver.navigate().to(URL + "/cliente.html");
+		PO_JQueryView.login(driver, "daniel@gmail.com", "123456");
+
+		// comprobamos que hay 3 usuarios en la lista
+		List<WebElement> elementos = SeleniumUtils.EsperaCargaPagina(driver, "free", "//tbody/tr",
+				PO_View.getTimeout());
+		assertTrue(elementos.size() == 3);
+
+		PO_JQueryView.searchForm(driver, "pepe@gmail");
+
+		SeleniumUtils.EsperaCargaPaginaNoTexto(driver, "Raul", PO_View.getTimeout());
+
+		elementos = SeleniumUtils.EsperaCargaPagina(driver, "free", "//tbody/tr", PO_View.getTimeout());
+		assertTrue(elementos.size() == 1);
+
+		PO_JQueryView.chat(driver);
+
+		SeleniumUtils.EsperaCargaPaginaNoTexto(driver, "Actualizar", PO_View.getTimeout());
+
+		// Creamos un mensaje
+		PO_JQueryView.crearMensaje(driver, "Prueba");
+
+		PO_View.checkElement(driver, "text", "Prueba");
+	}
+
+	@Test
+	public void CListMenVal() {
+		PO_HomeView.clickOption(driver, "login", "class", "login");
+
+		PO_LoginView.fillForm(driver, "daniel@gmail.com", "123456");
+
+		PO_UserListView.fillForm(driver, "Pepe");
+		PO_UserListView.sendPetition(driver);
+		PO_View.checkElement(driver, "text", "Enviada");
+
+		PO_UserListView.fillForm(driver, "Raul");
+		PO_UserListView.sendPetition(driver);
+		PO_View.checkElement(driver, "text", "Enviada");
+
+		PO_UserListView.fillForm(driver, "Maria");
+		PO_UserListView.sendPetition(driver);
+		PO_View.checkElement(driver, "text", "Enviada");
+
+		PO_HomeView.clickOption(driver, "logout");
+
+		PO_LoginView.fillForm(driver, "pepe@gmail.com", "123456");
+		PO_HomeView.clickOption(driver, "friendRequests", "class", "solicitudesAmistad");
+		PO_FriendRequestView.clickBotonAceptar(driver);
+		PO_View.checkElement(driver, "text", "No tienes ninguna petición de amistad pendiente");
+
+		PO_HomeView.clickOption(driver, "logout");
+
+		PO_LoginView.fillForm(driver, "raul@gmail.com", "123456");
+		PO_HomeView.clickOption(driver, "friendRequests", "class", "solicitudesAmistad");
+		PO_FriendRequestView.clickBotonAceptar(driver);
+		PO_View.checkElement(driver, "text", "No tienes ninguna petición de amistad pendiente");
+
+		PO_HomeView.clickOption(driver, "logout");
+
+		PO_LoginView.fillForm(driver, "maria@gmail.com", "123456");
+		PO_HomeView.clickOption(driver, "friendRequests", "class", "solicitudesAmistad");
+		PO_FriendRequestView.clickBotonAceptar(driver);
+		PO_View.checkElement(driver, "text", "No tienes ninguna petición de amistad pendiente");
+
+		driver.navigate().to(URL + "/cliente.html");
+		PO_JQueryView.login(driver, "daniel@gmail.com", "123456");
+
+		// comprobamos que hay 3 usuarios en la lista
+		List<WebElement> elementos = SeleniumUtils.EsperaCargaPagina(driver, "free", "//tbody/tr",
+				PO_View.getTimeout());
+		assertTrue(elementos.size() == 3);
+
+		PO_JQueryView.searchForm(driver, "pepe@gmail");
+
+		SeleniumUtils.EsperaCargaPaginaNoTexto(driver, "Raul", PO_View.getTimeout());
+
+		elementos = SeleniumUtils.EsperaCargaPagina(driver, "free", "//tbody/tr", PO_View.getTimeout());
+		assertTrue(elementos.size() == 1);
+
+		PO_JQueryView.chat(driver);
+
+		SeleniumUtils.EsperaCargaPaginaNoTexto(driver, "Actualizar", PO_View.getTimeout());
+
+		// Creamos 3 mensajes
+		PO_JQueryView.crearMensaje(driver, "Prueba1");
+		PO_View.checkElement(driver, "text", "Prueba1");
+		PO_JQueryView.crearMensaje(driver, "Prueba2");
+		PO_View.checkElement(driver, "text", "Prueba2");
+
+		// Vamos a crear un mensaje con el otro usuario
+
+		driver.navigate().to(URL + "/cliente.html?w=login");
+		PO_JQueryView.login(driver, "pepe@gmail.com", "123456");
+
+		// comprobamos que hay 3 usuarios en la lista
+		elementos = SeleniumUtils.EsperaCargaPagina(driver, "free", "//tbody/tr", PO_View.getTimeout());
+		assertTrue(elementos.size() == 1);
+
+		PO_JQueryView.chat(driver);
+
+		SeleniumUtils.EsperaCargaPaginaNoTexto(driver, "Actualizar", PO_View.getTimeout());
+
+		PO_JQueryView.crearMensaje(driver, "Prueba3");
+		PO_View.checkElement(driver, "text", "Prueba3");
+
+		// Comprobamos que estan los 3 mensajes
+		PO_View.checkElement(driver, "text", "Prueba1");
+		PO_View.checkElement(driver, "text", "Prueba2");
+		PO_View.checkElement(driver, "text", "Prueba3");
 	}
 }

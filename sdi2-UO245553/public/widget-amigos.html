@@ -1,0 +1,183 @@
+<div id="widget-amigos">
+
+	<input type="text" class="form-control" placeholder="Filtrar por email"
+		id="filtro-email" />
+
+	<button class="btn" onclick="cargarAmigos()" id="actualizarAmigos">Actualizar</button>
+	<table class="table table-hover">
+		<thead>
+			<tr>
+				<th>Nombre</th>
+				<th>Email</th>
+				<th class="col-md-1"></th>
+			</tr>
+		</thead>
+		<tbody id="tablaCuerpo">
+
+		</tbody>
+	</table>
+</div>
+
+<script>
+	window.history.pushState("", "", "/cliente.html?w=amigos");
+
+	var amigos;
+	var mensajes;
+	function cargarAmigos() {
+		$.ajax({
+			url : URLbase + "/usuarios",
+			type : "POST",
+			data : {
+				searchText : $("#filtro-email").val()
+			},
+			dataType : 'json',
+			headers : {
+				"token" : token
+			},
+			success : function(respuesta) {
+				amigos = respuesta;
+				actualizarTabla(amigos);
+			},
+			error : function(error) {
+				$("#contenedor-principal").load("widget-login.html");
+			}
+		});
+	}
+	function actualizarTabla(amigos) {
+		$("#tablaCuerpo").empty(); // Vaciar la tabla
+		for (i = 0; i < amigos.length; i++) {
+			cargarMensajes(amigos[i].recipient._id, i, false);
+		}
+	}
+
+	cargarAmigos();
+
+	function cargarChat(_id) {
+		idUser = _id;
+
+		var aux = [];
+
+		for (i = 0; i < mensajes.length; i++) {
+			if (mensajes[i].emisor._id == _id && mensajes[i].leido == false) {
+				aux.push(mensajes[i]);
+			}
+		}
+
+		$.ajax({
+			url : URLbase + "/mensaje",
+			type : "PUT",
+			data : {
+				id : _id,
+				mensajes : aux
+			},
+			dataType : 'json',
+			headers : {
+				"token" : token
+			},
+			success : function(respuesta) {
+				$("#contenedor-principal").load("widget-chat.html");
+			},
+			error : function(error) {
+				$("#contenedor-principal").load("widget-login.html");
+			}
+		});
+	}
+
+	function crearTabla(mensajes, i, _id) {
+		var contador = 0;
+
+		for (j = 0; j < mensajes.length; j++) {
+			if (mensajes[j].leido == false && mensajes[j].emisor._id == _id) {
+				contador++;
+			}
+		}
+
+		if (contador == 0) {
+			$("#tablaCuerpo").append(
+					"<tr id="+amigos[i]._id+">" + "<td>"
+							+ amigos[i].recipient.nombre + "</td>" + "<td>"
+							+ amigos[i].recipient.email + "</td>" + "<td>"
+							+ "<a onclick=cargarChat('"
+							+ amigos[i].recipient._id
+							+ "') class='btn btn-primary'>" + "Ver chat</a>"
+							+ "</td></tr>");
+		} else {
+			$("#tablaCuerpo")
+					.append(
+							"<tr id="+amigos[i]._id+">"
+									+ "<td>"
+									+ amigos[i].recipient.nombre
+									+ "</td>"
+									+ "<td>"
+									+ amigos[i].recipient.email
+									+ "</td>"
+									+ "<td>"
+									+ "<a id='link'"
+									+ amigos[i]._id
+									+ " onclick=cargarChat('"
+									+ amigos[i].recipient._id
+									+ "') class='btn btn-primary'>"
+									+ "Ver chat <span class='badge' id='not'" 
+									+ amigos[i]._id + ">"
+									+ contador + "</span></a>" + "</td></tr>");
+		}
+	}
+
+	// Si aux es false carga la tabla entera
+	// Si aux es true carga solo las notificaciones
+	function cargarMensajes(_id, i, aux) {
+		$.ajax({
+			url : URLbase + "/mensajes/" + _id,
+			type : "GET",
+			data : {},
+			dataType : 'json',
+			headers : {
+				"token" : token
+			},
+			success : function(respuesta) {
+				mensajes = respuesta;
+				if (!aux) {
+					crearTabla(mensajes, i, _id);
+				} else {
+					actualizarNotificacionMensajes(mensajes, i, _id);
+				}
+
+			},
+			error : function(error) {
+				$("#contenedor-principal").load("widget-login.html");
+			}
+		});
+
+		function actualizarMensajes() {
+			var contador = 0;
+
+			for (i = 0; i < amigos.length; i++) {
+				cargarMensajes(amigos[i].recipient._id, i, true);
+			}
+		}
+
+		function actualizarNotificacionMensajes(mensajes, i, _id) {
+			var contador = 0;
+
+			for (j = 0; j < mensajes.length; j++) {
+				if (mensajes[j].leido == false && mensajes[j].emisor._id == _id) {
+					contador++;
+				}
+			}
+
+			$("#not" + amigos[i]._id).empty();
+
+			if (contador != 0) {
+				$("#link" + amigos[i]._id).append(
+						"<span class='badge' id='not'" 
+					+ amigos[i]._id + ">"
+								+ contador + "</span>");
+			}
+		}
+
+		//setInterval(function() {
+		//console.log("Entro")
+		//actualizarMensajes();
+		//}, 20000);
+	}
+</script>
